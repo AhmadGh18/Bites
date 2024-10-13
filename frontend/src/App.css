@@ -1,0 +1,31 @@
+@keyframes wave-animation {
+    0% {
+        clip-path: ellipse(100% 100% at 50% 100%);
+    }
+
+    25% {
+        clip-path: ellipse(100% 90% at 50% 90%);
+    }
+
+    50% {
+        clip-path: ellipse(100% 100% at 50% 100%);
+    }
+
+    75% {
+        clip-path: ellipse(100% 90% at 50% 110%);
+    }
+
+    100% {
+        clip-path: ellipse(100% 100% at 50% 100%);
+    }
+}
+
+.wave-effect {
+    animation: wave-animation 1s ease-in-out 1;
+}
+
+.l {
+    background-color: #f6843d;
+}
+
+/*eea927*/
