@@ -31,7 +31,7 @@ const Banner = () => {
   }, []);
   return (
     <div className="relative overflow-hidden font-body">
-      <div className="h-[90vh] flex flex-col md:flex-row bg-gray-50 md:mt-0">
+      <div className="h-[86vh] flex flex-col md:flex-row bg-gray-50 md:mt-0">
         {/* Text Section */}
         <div
           className={`w-full md:w-1/2 h-full flex flex-col justify-center items-center p-6 ${

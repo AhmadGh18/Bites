@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import logo from "../assets/a_simple_white_and_orange_logo_for_a_restaurant_finder_website_called_bites-removebg-preview.png";
 import { Link } from "react-router-dom";
@@ -10,38 +10,50 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
+  // Prevent background scroll when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
   return (
     <nav className="bg-white font-body text-black shadow-lg w-full z-50 transition duration-300 ease-in-out">
-      {/* Fixed navbar */}
       <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
-        <Link to="/">
+        <Link to="/" aria-label="Home">
           <div className="font-bold flex items-center">
             <img src={logo} className="h-16" alt="Logo" />
             <p className="text-2xl text-primary ml-[-10px] mt-2">Bites</p>
           </div>
         </Link>
         <div className="hidden md:flex space-x-6 text-lg items-center">
-          <a href="#" className="hover:text-orange-500 transition duration-200">
-            Home
-          </a>
-          <a href="#" className="hover:text-orange-500 transition duration-200">
-            About
-          </a>
-          <a href="#" className="hover:text-orange-500 transition duration-200">
-            Services
-          </a>
-          <a href="#" className="hover:text-orange-500 transition duration-200">
-            Contact
-          </a>
-          <a href="#" className="hover:text-orange-500 transition duration-200">
-            Discover
-          </a>
-          <button className="bg-primary px-4 py-2 rounded-md text-gray-50">
+          {["Home", "About", "Services", "Contact", "Discover"].map((item) => (
+            <Link
+              key={item}
+              to={`/${item.toLowerCase()}`}
+              className="hover:text-orange-500 transition duration-200"
+            >
+              {item}
+            </Link>
+          ))}
+          <Link
+            to="/login"
+            className="bg-primary px-4 py-2 rounded-md text-gray-50"
+          >
             Login
-          </button>
+          </Link>
         </div>
         <div className="md:hidden">
-          <button onClick={toggleMenu} className="focus:outline-none">
+          <button
+            onClick={toggleMenu}
+            className="focus:outline-none"
+            aria-label="Toggle Menu"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 text-gray-800"
@@ -72,6 +84,7 @@ const Navbar = () => {
           <button
             onClick={toggleMenu}
             className="absolute top-4 right-4 focus:outline-none"
+            aria-label="Close Menu"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -89,39 +102,31 @@ const Navbar = () => {
             </svg>
           </button>
           <div className="flex flex-col space-y-6 text-lg text-gray-800 font-semibold text-center">
-            <a
-              href="#"
+            {["Home", "About", "Services", "Contact", "Discover"].map(
+              (item) => (
+                <Link
+                  key={item}
+                  to={`/${item.toLowerCase()}`}
+                  className="hover:text-orange-500 transition duration-200"
+                  onClick={toggleMenu}
+                >
+                  {item}
+                </Link>
+              )
+            )}
+            <Link
+              to="/map"
               className="hover:text-orange-500 transition duration-200"
+              onClick={toggleMenu}
             >
-              Home
-            </a>
-            <a
-              href="#"
-              className="hover:text-orange-500 transition duration-200"
+              Map
+            </Link>
+            <Link
+              to="/login"
+              className="bg-primary px-6 py-3 rounded-md text-gray-50"
             >
-              About
-            </a>
-            <a
-              href="#"
-              className="hover:text-orange-500 transition duration-200"
-            >
-              Services
-            </a>
-            <a
-              href="#"
-              className="hover:text-orange-500 transition duration-200"
-            >
-              Contact
-            </a>
-            <a
-              href="#"
-              className="hover:text-orange-500 transition duration-200"
-            >
-              Discover
-            </a>
-            <button className="bg-primary px-6 py-3 rounded-md text-gray-50">
               Login
-            </button>
+            </Link>
           </div>
         </motion.div>
       )}

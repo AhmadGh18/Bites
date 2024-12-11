@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string("name");
-            $table->string("phone_number");
+            $table->string("phoneNumber");
             $table->string("facebook")->nullable();
             $table->string("instagram")->nullable();
             $table->string("latitude");
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade'); // Foreign key for restaurant
 
             $table->string('Bio')->nullable();
-            $table->string("logo")->nullable();
+            $table->string("profile_picture")->nullable();
         });
     }
 

@@ -18,6 +18,9 @@ class AuthController extends Controller
         $data['name'] = $data['first_name'] . ' ' . $data['last_name'];
         $user = User::create($data);
         event(new Registered($user));
+        return response()->json([
+            'message' => 'verfication email was sent successfully'
+        ]);
     }
     public function login(Request $request)
     {
@@ -34,6 +37,13 @@ class AuthController extends Controller
             ], 404);
         }
 
+        if ($user->is_Verfied == 0) {
+            event(new Registered($user));
+            return response()->json([
+                'message' => 'Account not verified. Please check your email for verification.'
+            ], 403);
+        }
+
         if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
             return response()->json([
                 'message' => 'Invalid credentials'
@@ -42,15 +52,10 @@ class AuthController extends Controller
 
         $token = $user->createToken('main')->plainTextToken;
 
-        if ($user->google_id) {
-            return response()->json([
-                'token' => $token
-            ]);
-        } else {
-            return response()->json([
-                'token' => $token,
-                'message' => 'Login successful'
-            ]);
-        }
+        return response()->json([
+            'token' => $token,
+            'message' => 'Login successful',
+            "user" => $user
+        ]);
     }
 }

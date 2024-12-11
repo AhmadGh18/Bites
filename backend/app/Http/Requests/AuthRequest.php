@@ -21,15 +21,15 @@ class AuthRequest extends FormRequest
         return [
             "first_name" => "required|string|min:3",
             "last_name" => "required|string|min:3",
+            "has_restaurant" => "required|boolean",
             'email' => 'required|email|unique:users,email',
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)
+                Password::min(6)
                     ->letters()
                     ->mixedCase()
                     ->numbers()
-                    ->symbols()
             ],
         ];
     }

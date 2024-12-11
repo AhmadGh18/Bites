@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Restaurant extends Model
 {
     use HasFactory;
-    protected $fillabe = [
+    protected $fillable = [
         "name",
         "longitude",
         "latitude",
         "city",
-        "phone_number",
+        "phoneNumber",
         "facebook",
         "instagram",
         "Type",
         "Bio",
         "user_id",
-        "logo"
+        "profile_picture"
     ];
     public function user()
     {

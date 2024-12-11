@@ -27,6 +27,7 @@ class EmailVerficationController extends Controller
         $token = $user->createToken('main')->plainTextToken;
 
 
+
         return redirect(config("app.frontend_url") . "/home?token=" . $token);
     }
 }

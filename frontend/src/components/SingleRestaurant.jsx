@@ -1,16 +1,11 @@
 import React from "react";
 import img from "../assets/imageslog.png";
-import {
-  FaBookmark,
-  FaMapMarked,
-  FaMapMarker,
-  FaMapMarkerAlt,
-  FaStar,
-} from "react-icons/fa";
+import { FaBookmark, FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 const SingleRestaurant = () => {
   return (
-    <div className="md:h-[80vh] h-auto bg-white shadow-lg rounded-lg mt-3 overflow-hidden font-body transition-transform transform hover:-translate-y-1 hover:shadow-2xl">
+    <div className="md:h-[80vh] h-[60vh] bg-cards shadow-md rounded-lg mt-5 overflow-hidden font-body transition-transform transform hover:-translate-y-1 hover:shadow-2xl">
+      {/* Image section */}
       <div className="h-[60%] relative">
         <img
           src={img}
@@ -18,28 +13,39 @@ const SingleRestaurant = () => {
           className="h-full w-full object-cover"
         />
         <div className="absolute top-3 right-5">
-          <div className=" p-2 rounded-full shadow-md transition-all duration-300 bg-primary">
-            <FaBookmark className="text-white hover:text-white text-xl" />
+          <div className="p-2 rounded-full shadow-md transition duration-300 bg-white hover:bg-primaryHover">
+            <FaBookmark className="text-primary hover:text-white text-xl" />
           </div>
         </div>
       </div>
-      <div className="p-4 text-gray-800 space-y-2 bg-gray-50 h-full pb-7">
-        <h2 className="text-xl font-semibold text-gray-700">Bar . Siada</h2>
-        <p className="text-sm text-gray-500">Restaurant Name</p>
-        <div className="flex items-center gap-2 text-gray-600">
-          <FaMapMarkerAlt className="text-gray-700" />
+
+      {/* Content section */}
+      <div className="p-4 text-textColor space-y-2 h-[40%] bg-white pb-6">
+        {/* Restaurant title */}
+        <h2 className="text-2xl font-semibold text-textColor">Bar . Siada</h2>
+        <p className="text-sm text-secondaryText">Restaurant Name</p>
+
+        {/* Location */}
+        <div className="flex items-center gap-2 text-textColor">
+          <FaMapMarkerAlt className="text-primary" />
           <p className="text-sm">Siaida near Abou Ali</p>
         </div>
+
+        {/* Ratings */}
         <div className="flex items-center gap-2">
-          <div className="flex text-yellow-400 text-lg">
+          <div className="flex text-ratings text-lg">
             {[1, 2, 3, 4].map((el) => (
               <FaStar key={el} />
             ))}
             <FaStar className="text-gray-300" />
           </div>
-          <p className="text-sm text-gray-100">(20 reviews)</p>
+          <p className="text-sm text-secondaryText">(20 reviews)</p>
         </div>
-        <p className="text-gray-600 text-sm leading-6 pb-6">
+
+        <hr className="border-borderGray my-2" />
+
+        {/* Description */}
+        <p className="text-secondaryText text-sm leading-6 hidden md:block">
           Discover the flavors of Bar.Siada, offering a blend of local cuisine
           and a cozy ambiance for an unforgettable dining experience.
         </p>

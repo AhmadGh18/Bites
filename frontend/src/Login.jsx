@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react"; // Ensure React and useState are imported
-import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "./context/ContextProvider";
 import axiosClient from "./axiosClient";
@@ -8,18 +6,27 @@ import axiosClient from "./axiosClient";
 const Login = () => {
   const nav = useNavigate();
 
-  const { token, setToken } = useStateContext();
+  const { token, setToken, User, setUser } = useStateContext();
   useEffect(() => {
     if (token) {
-      nav("/dashboard");
+      return nav("/");
     }
-  }, [token]); // Add token as a dependency
-  const [email, setEmail] = useState(null); // Corrected naming convention
+  }, [token]);
+  useEffect(() => {
+    if (User) {
+      if (User.has_restaurant) {
+        return nav("/restaurants");
+      } else {
+        return nav("/users");
+      }
+    }
+  }, [User]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [errorMessage, setErrorMessage] = useState(null); // Change to single message
 
   const [click, setisclick] = useState(false);
   function toggleclick() {
@@ -29,30 +36,7 @@ const Login = () => {
     const timer = setTimeout(() => setShowForm(true), 100); // Adjust the delay as needed
     return () => clearTimeout(timer);
   }, []);
-  // const login = useGoogleLogin({
-  //   ux_mode: "redirect",
-  //   redirect_uri: "http://localhost:3000/dahboard",
 
-  //   onSuccess: async (credentialResponse) => {
-  //     try {
-  //       const res = await axios.get(
-  //         "https://www.googleapis.com/oauth2/v3/userinfo",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${credentialResponse.access_token}`, // Use template literals correctly
-  //           },
-  //         }
-  //       );
-  //       console.log(res.data);
-  //       setEmail(res.data.email); // Set the email state with fetched email
-  //     } catch (e) {
-  //       console.error("Error fetching user info:", e);
-  //     }
-  //   },
-  //   onFailure: (error) => {
-  //     console.error("Login failed:", error);
-  //   },
-  // });
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -62,20 +46,33 @@ const Login = () => {
   };
   function handlesubmit(e) {
     e.preventDefault();
-    axios.post("http://localhost:8000/api/register", formData).then((res) => {
-      console.log(res);
-    });
-  }
-  function handellogin() {
-    axiosClient.post("/login", formData).then((res) => {
-      console.log(res);
-    });
+    axiosClient
+      .post("/login", formData)
+      .then((res) => {
+        console.log(res);
+        setToken(res.data.token);
+        setUser(res.data.user);
+        if (res.data.user.has_restaurant) {
+          return nav("/restaurants");
+        } else {
+          return nav("/users");
+        }
+      })
+      .catch((err) => {
+        const response = err.response.data;
+        if (response.errors) {
+          const errors = Object.values(response.errors).flat().join(", ");
+          setErrorMessage(errors);
+        } else {
+          setErrorMessage(response.message);
+        }
+      });
   }
 
   return (
     <div>
       <div
-        className={`bg-gray-50 mt-10 font-sans transition-opacity duration-1000 ${
+        className={`bg-gray-50  font-body transition-opacity duration-1000 ${
           showForm ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -85,12 +82,12 @@ const Login = () => {
               <h2 className="text-gray-800 text-center text-2xl font-bold m-6 md:m-0">
                 Log in
               </h2>
-              {/* {error && (
+              {errorMessage && (
                 <div className="mt-2 p-4 bg-red-100 text-red-800 border border-red-300 rounded">
-                  <p>{error}</p>
+                  <p>{errorMessage}</p>
                 </div>
-              )} */}
-              <form className="mt-1 space-y-4" onSubmit={handellogin}>
+              )}
+              <form className="mt-1 space-y-4" onSubmit={handlesubmit}>
                 <div>
                   <label
                     htmlFor="username"

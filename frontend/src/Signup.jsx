@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from "react"; // Ensure React and useState are imported
-import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axiosClient from "./axiosClient";
+import { useStateContext } from "./context/ContextProvider";
+import validator from "validator";
 
 const Signup = () => {
   const [email, setEmail] = useState(null); // Corrected naming convention
   const [showForm, setShowForm] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     password_confirmation: "",
     first_name: "",
     last_name: "",
+    has_restaurant: 0,
   });
+  const { token, setToken, User, setUser } = useStateContext();
+  const [errorMessage, setErrorMessage] = useState(null); // Change to single message
+  const [successMessage, setSuccessMessage] = useState(null);
   const [click, setisclick] = useState(false);
+  const nav = useNavigate();
   function toggleclick() {
     setisclick(!click);
   }
@@ -21,47 +30,47 @@ const Signup = () => {
     const timer = setTimeout(() => setShowForm(true), 100); // Adjust the delay as needed
     return () => clearTimeout(timer);
   }, []);
-  // const login = useGoogleLogin({
-  //   ux_mode: "redirect",
-  //   redirect_uri: "http://localhost:3000/dahboard",
-
-  //   onSuccess: async (credentialResponse) => {
-  //     try {
-  //       const res = await axios.get(
-  //         "https://www.googleapis.com/oauth2/v3/userinfo",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${credentialResponse.access_token}`, // Use template literals correctly
-  //           },
-  //         }
-  //       );
-  //       console.log(res.data);
-  //       setEmail(res.data.email); // Set the email state with fetched email
-  //     } catch (e) {
-  //       console.error("Error fetching user info:", e);
-  //     }
-  //   },
-  //   onFailure: (error) => {
-  //     console.error("Login failed:", error);
-  //   },
-  // });
+  useEffect(() => {
+    if (token) {
+      return nav("/");
+    }
+  }, [token]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+    if (name === "email" && value != "") {
+      setIsValid(validator.isEmail(value));
+    }
   };
-  function handlesubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post("http://localhost:8000/api/register", formData).then((res) => {
-      console.log(res);
-    });
-  }
+    if (isValid) {
+      axiosClient
+        .post("/register", formData)
+        .then((res) => {
+          setSuccessMessage(res.data.message);
+          setErrorMessage(null);
+        })
+        .catch((err) => {
+          const response = err.response.data;
+          if (response.errors) {
+            const errors = Object.values(response.errors).flat().join(", ");
+            setErrorMessage(errors);
+          } else {
+            setErrorMessage(response.message);
+          }
+        });
+    } else {
+      console.log("no");
+    }
+  };
   return (
     <div>
       <div
-        className={`bg-gray-50  font-sans transition-opacity duration-1000 ${
+        className={`bg-gray-50  font-body transition-opacity duration-1000 ${
           showForm ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -71,12 +80,62 @@ const Signup = () => {
               <h2 className="text-gray-800 text-center text-2xl font-bold m-6 md:m-0">
                 Create Account
               </h2>
-              {/* {error && (
-                <div className="mt-2 p-4 bg-red-100 text-red-800 border border-red-300 rounded">
-                  <p>{error}</p>
+              {successMessage && (
+                <div className="mt-2 p-4 bg-green-100 text-green-800 border border-green-300 rounded">
+                  <p>{successMessage}</p>
                 </div>
-              )} */}
-              <form className="mt-1 space-y-4" onSubmit={handlesubmit}>
+              )}
+              {/* Show errorMessage only when it's not null */}
+              {errorMessage && (
+                <div className="mt-2 p-4 bg-red-100 text-red-800 border border-red-300 rounded">
+                  <p>{errorMessage}</p>
+                </div>
+              )}
+              <form className="mt-1 space-y-4" onSubmit={handleSubmit}>
+                <div className="flex items-center justify-center gap-3 md:mt-8">
+                  <div>
+                    <label
+                      htmlFor="username"
+                      className="font-semibold text-sm mb-2 block"
+                    >
+                      First Name
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        id="username"
+                        name="first_name"
+                        type="text"
+                        required
+                        aria-required="true"
+                        className="w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
+                        placeholder="john"
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative flex items-center">
+                    <div>
+                      <label
+                        htmlFor="username"
+                        className="font-semibold text-sm mb-2 block"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        id="username"
+                        name="last_name"
+                        type="text"
+                        required
+                        aria-required="true"
+                        className="w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
+                        placeholder="Doe"
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label
                     htmlFor="username"
@@ -91,10 +150,13 @@ const Signup = () => {
                       type="email"
                       required
                       aria-required="true"
-                      className="w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
+                      className={`w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800 ${
+                        !isValid ? "ring-red-600 ring-2" : ""
+                      }`}
                       placeholder="Enter Email"
                       onChange={handleChange}
                     />
+                    {}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="#bbb"
@@ -115,83 +177,6 @@ const Signup = () => {
                       ></path>
                     </svg>
                   </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="username"
-                    className="font-semibold text-sm mb-2 block"
-                  >
-                    First Name
-                  </label>
-                  <div className="relative flex items-center">
-                    <input
-                      id="username"
-                      name="first_name"
-                      type="text"
-                      required
-                      aria-required="true"
-                      className="w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
-                      placeholder="john"
-                      onChange={handleChange}
-                    />
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="#bbb"
-                      stroke="#bbb"
-                      className="w-4 h-4 absolute right-4"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="10"
-                        cy="7"
-                        r="6"
-                        data-original="#000000"
-                      ></circle>
-                      <path
-                        d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                        data-original="#000000"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-                <label
-                  htmlFor="username"
-                  className="font-semibold text-sm mb-2 block"
-                >
-                  Last Name
-                </label>
-                <div className="relative flex items-center">
-                  <input
-                    id="username"
-                    name="last_name"
-                    type="text"
-                    required
-                    aria-required="true"
-                    className="w-full text-gray-800 text-sm border border-gray-300 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
-                    placeholder="Doe"
-                    onChange={handleChange}
-                  />
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="#bbb"
-                    stroke="#bbb"
-                    className="w-4 h-4 absolute right-4"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      cx="10"
-                      cy="7"
-                      r="6"
-                      data-original="#000000"
-                    ></circle>
-                    <path
-                      d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                      data-original="#000000"
-                    ></path>
-                  </svg>
                 </div>
 
                 <div>
@@ -296,7 +281,7 @@ const Signup = () => {
                       alt="Google logo"
                     />
                     <a
-                      href="http://localhost:8000/auth/google/redirect"
+                      href="http://localhost:8000/auth/google/redirect?role=user"
                       className="ml-8"
                     >
                       Continue with Google
